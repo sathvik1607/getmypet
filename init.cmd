@@ -1,3 +1,3 @@
 @echo off
-call "%~dp0dragonbreak.cmd" init
+call "%~dp0petcompanion.cmd" init
 exit /b %errorlevel%

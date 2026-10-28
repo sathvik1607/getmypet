@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$assetDir = Join-Path (Split-Path -Parent $PSScriptRoot) 'Assets'
+$assetDir = Join-Path (Split-Path -Parent $PSScriptRoot) 'src/Pets/Dragon/Assets/Audio'
 New-Item -ItemType Directory -Path $assetDir -Force | Out-Null
 Add-Type -TypeDefinition @'
 using System;

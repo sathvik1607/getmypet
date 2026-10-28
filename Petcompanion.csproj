@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <StartupObject>Petcompanion.Program</StartupObject>
+    <AssemblyName>Petcompanion</AssemblyName>
+    <RootNamespace>Petcompanion</RootNamespace>
+    <Product>Petcompanion</Product>
+    <Title>Petcompanion</Title>
+    <Description>Your desktop companions and gentle reminders</Description>
+    <ApplicationIcon>Assets\Brand\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Assets\Brand\app.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="src\Pets\**\Assets\Audio\*.wav" CopyToOutputDirectory="PreserveNewest">
+      <TargetPath>Pets\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+    </Content>
+  </ItemGroup>
+</Project>

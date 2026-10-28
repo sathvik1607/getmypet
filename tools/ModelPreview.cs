@@ -8,15 +8,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 
-namespace DragonBreak;
+namespace Petcompanion;
 
 internal sealed class ModelPreview : Window
 {
     public static string ExportFolder => Path.Combine(AppContext.BaseDirectory, "model-preview");
     public ModelPreview()
     {
-        Title = "DragonBreak · 3D model preview"; Width = 1120; Height = 760;
-        MinWidth = 700; MinHeight = 500; Background = Ui.Ink;
+        Ui.ApplyTheme(this);
+        Title = "Petcompanion · 3D model preview"; Width = 1120; Height = 760;
+        MinWidth = 700; MinHeight = 500; Background = Ui.Background;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         var model = new DragonModel();
         var root = new Grid { Margin = new Thickness(26) };
@@ -24,10 +25,10 @@ internal sealed class ModelPreview : Window
         root.RowDefinitions.Add(new RowDefinition());
         root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         var title = new StackPanel();
-        title.Children.Add(Ui.Text("DRAGON / 3D STUDY", 27, Ui.Mint));
+        title.Children.Add(Ui.Text("DRAGON / 3D STUDY", 27, Ui.Accent));
         title.Children.Add(Ui.Text("Drag to rotate · scroll to zoom · live articulated geometry", 15, Ui.Muted));
         root.Children.Add(title);
-        var stage = new Border { Background = new RadialGradientBrush(Color.FromRgb(23, 48, 41), Color.FromRgb(9, 20, 24)), CornerRadius = new CornerRadius(16), Child = model };
+        var stage = new Border { Background = new RadialGradientBrush(Color.FromRgb(255, 249, 238), Color.FromRgb(232, 215, 221)), CornerRadius = new CornerRadius(16), Child = model };
         Grid.SetRow(stage, 1); root.Children.Add(stage);
         double yaw = 0, pitch = .25; Point last = default; bool dragging = false;
         void Camera()

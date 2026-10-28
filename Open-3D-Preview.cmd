@@ -1,3 +1,3 @@
 @echo off
-call "%~dp0dragonbreak.cmd" preview
+call "%~dp0petcompanion.cmd" preview
 exit /b %errorlevel%

@@ -5,7 +5,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $process = Get-Process -Id $ProcessId
-if ($process.ProcessName -ne 'DragonBreak') { throw 'Choose a DragonBreak process ID.' }
+if ($process.ProcessName -ne 'Petcompanion') { throw 'Choose a Petcompanion process ID.' }
 $process.Refresh()
 $cpuStart = $process.TotalProcessorTime.TotalSeconds
 $watch = [Diagnostics.Stopwatch]::StartNew()

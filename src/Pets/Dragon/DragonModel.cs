@@ -6,14 +6,14 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 
-namespace DragonBreak;
+namespace Petcompanion;
 
 // Live geometry: a curved spine, a tube skin, articulated legs, and a turning head.
 // No sprite frames or image textures are used to render the dragon.
-internal sealed class DragonModel : Grid
+internal sealed class DragonModel : Grid, IPetVisual
 {
     private const int Rings = 64, Sides = 12;
-    private readonly MeshGeometry3D _greenSkin = new(), _bellySkin = new();
+    private readonly MeshGeometry3D _greenSkin = new(), _bellySkin = new(), _bellyRibs = new();
     private readonly Point3D[] _spine = new Point3D[Rings];
     private readonly Model3DGroup _head = new(), _dragon = new();
     private readonly Bone[,] _legs = new Bone[4, 5];
@@ -24,13 +24,16 @@ internal sealed class DragonModel : Grid
     private readonly Stopwatch _time = Stopwatch.StartNew();
     public bool FacingRight { get; set; } = true;
     public double Bank { get; set; }
+    public double TravelHeadingDegrees { get; set; }
+    private readonly RotateTransform _flightHeading = new();
     public int PoseUpdates { get; private set; }
     public bool Paused { get; set; }
     public OrthographicCamera Camera { get; }
     public Model3DGroup Geometry => _dragon;
-    private static readonly Material Green = Material(Color.FromRgb(39, 165, 69));
+    private static readonly Material Green = Material(Color.FromRgb(43, 158, 94));
     private static readonly Material DarkGreen = Material(Color.FromRgb(15, 78, 44));
-    private static readonly Material Gold = Material(Color.FromRgb(244, 189, 74));
+    private static readonly Material Gold = Material(Color.FromRgb(239, 192, 98));
+    private static readonly Material BellyLine = Material(Color.FromRgb(177, 122, 43));
     private static readonly Material Horn = Material(Color.FromRgb(159, 102, 49));
     private static readonly Material Ivory = Material(Color.FromRgb(249, 237, 195));
     private static readonly MeshGeometry3D SphereMesh = Sphere();
@@ -43,7 +46,8 @@ internal sealed class DragonModel : Grid
         var view = new Viewport3D
         {
             Camera = Camera,
-            ClipToBounds = false
+            ClipToBounds = false,
+            RenderTransform = _flightHeading, RenderTransformOrigin = new Point(.5, .5)
         };
         Children.Add(view);
         var scene = new Model3DGroup();
@@ -52,6 +56,7 @@ internal sealed class DragonModel : Grid
         scene.Children.Add(new DirectionalLight(Color.FromRgb(109, 204, 179), new Vector3D(2, 1, 3)));
         _dragon.Children.Add(new GeometryModel3D(_greenSkin, Green) { BackMaterial = Green });
         _dragon.Children.Add(new GeometryModel3D(_bellySkin, Gold) { BackMaterial = Gold });
+        _dragon.Children.Add(new GeometryModel3D(_bellyRibs, BellyLine) { BackMaterial = BellyLine });
         BuildIndices(); BuildHead(); _dragon.Children.Add(_head);
         for (int leg = 0; leg < 4; leg++)
             for (int bone = 0; bone < 5; bone++) _legs[leg, bone] = new Bone(_dragon, bone < 2 ? Green : Ivory);
@@ -72,7 +77,7 @@ internal sealed class DragonModel : Grid
         for (int ring = 0; ring < Rings - 1; ring++)
             for (int side = 0; side < Sides; side++)
             {
-                var mesh = side >= 7 && side <= 9 ? _bellySkin : _greenSkin;
+                var mesh = side >= 7 && side <= 9 ? (ring % 4 == 0 ? _bellyRibs : _bellySkin) : _greenSkin;
                 int a = ring * Sides + side, b = ring * Sides + (side + 1) % Sides;
                 mesh.TriangleIndices.Add(a); mesh.TriangleIndices.Add(b); mesh.TriangleIndices.Add(a + Sides);
                 mesh.TriangleIndices.Add(b); mesh.TriangleIndices.Add(b + Sides); mesh.TriangleIndices.Add(a + Sides);
@@ -106,7 +111,7 @@ internal sealed class DragonModel : Grid
                 skin.Add(_spine[ring] + normal * (Math.Cos(angle) * radius) + side * (Math.Sin(angle) * radius));
             }
         }
-        skin.Freeze(); _greenSkin.Positions = skin; _bellySkin.Positions = skin;
+        skin.Freeze(); _greenSkin.Positions = skin; _bellySkin.Positions = skin; _bellyRibs.Positions = skin;
         Vector3D forward = _spine[0] - _spine[2]; forward.Normalize();
         _head.Transform = Orient(new Vector3D(1, 0, 0), forward, _spine[0]);
         for (int leg = 0; leg < 4; leg++)
@@ -129,6 +134,8 @@ internal sealed class DragonModel : Grid
         }
         _turn.Angle += ((FacingRight ? 0 : 180) - _turn.Angle) * .07;
         _bank.Angle += (Math.Clamp(Bank, -28, 28) - _bank.Angle) * .08;
+        double relativeHeading = PetHeading.Relative(TravelHeadingDegrees, FacingRight);
+        _flightHeading.Angle += PetHeading.Delta(_flightHeading.Angle, relativeHeading) * .18;
         PoseUpdates++;
     }
 
@@ -141,8 +148,12 @@ internal sealed class DragonModel : Grid
         var red = Material(Color.FromRgb(247, 32, 34));
         for (int side = -1; side <= 1; side += 2)
         {
-            Ellipsoid(_head, new Point3D(.12, .13, side * .245), .115, .055, .025, red);
-            Ellipsoid(_head, new Point3D(.17, .13, side * .266), .019, .047, .012, DarkGreen);
+            Ellipsoid(_head, new Point3D(.12, .13, side * .245), .125, .066, .032, red);
+            new Bone(_head, DarkGreen).Place(new Point3D(-.045, .225, side * .25), new Point3D(.25, .19, side * .265), .040);
+            Ellipsoid(_head, new Point3D(.17, .13, side * .279), .023, .050, .014, DarkGreen);
+            Ellipsoid(_head, new Point3D(.185, .151, side * .291), .010, .015, .007, Ivory);
+            Fin(_head, new Point3D(-.17, .09, side * .25), new Point3D(-.60, .27, side * .34),
+                new Point3D(-.30, -.13, side * .33), Gold);
             Ellipsoid(_head, new Point3D(.58, .025, side * .12), .045, .025, .025, DarkGreen);
             var root = new Point3D(-.17, .24, side * .19);
             var tip = root + new Vector3D(-.23, .65, side * .12);
@@ -154,13 +165,23 @@ internal sealed class DragonModel : Grid
             {
                 double t = i / 10d;
                 Point3D next = new(.48 - t * .9, -.07 + Math.Sin(t * Math.PI * 1.6) * .2, side * (.23 + t * .5));
-                new Bone(_head, Gold).Place(previous, next, .012 * (1 - t * .65)); previous = next;
+                new Bone(_head, Gold).Place(previous, next, .015 * (1 - t * .65)); previous = next;
             }
+            for (int beard = 0; beard < 3; beard++)
+                new Bone(_head, Gold).Place(new Point3D(.13 - beard * .08, -.24, side * .09),
+                    new Point3D(-.08 - beard * .10, -.50 + beard * .03, side * (.13 + beard * .04)), .018);
             for (int tooth = 0; tooth < 3; tooth++)
                 new Bone(_head, Ivory).Place(new Point3D(.22 + tooth * .15, -.15, side * .175), new Point3D(.24 + tooth * .15, -.23, side * .16), .024);
             for (int spike = 0; spike < 5; spike++)
                 new Bone(_head, DarkGreen).Place(new Point3D(-.20, .05 + spike * .04, side * .18), new Point3D(-.65, .12 + spike * .075, side * (.22 + spike * .025)), .045);
         }
+    }
+
+    private static void Fin(Model3DGroup group, Point3D a, Point3D b, Point3D c, Material material)
+    {
+        var mesh = new MeshGeometry3D { Positions = new Point3DCollection { a, b, c },
+            TriangleIndices = new Int32Collection { 0, 1, 2 } };
+        mesh.Freeze(); group.Children.Add(new GeometryModel3D(mesh, material) { BackMaterial = material });
     }
 
     private static Material Material(Color color)

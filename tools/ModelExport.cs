@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 
-namespace DragonBreak;
+namespace Petcompanion;
 
 // Export the evaluated scene as a portable, colored static GLB pose.
 internal static class ModelExport
@@ -61,7 +61,7 @@ internal static class ModelExport
             primitives.Add(new { attributes = new { POSITION = position, NORMAL = normalAccessor }, indices, material, mode = 4 });
         }
         Visit(root, Matrix3D.Identity);
-        var document = new { asset = new { version = "2.0", generator = "DragonBreak static-pose exporter" },
+        var document = new { asset = new { version = "2.0", generator = "Petcompanion static-pose exporter" },
             scene = 0, scenes = new[] { new { nodes = new[] { 0 } } }, nodes = new[] { new { name = "Stylized dragon - static pose", mesh = 0 } },
             meshes = new[] { new { name = "Dragon", primitives } }, materials, accessors, bufferViews = views,
             buffers = new[] { new { byteLength = buffer.Length } } };

@@ -1,18 +1,18 @@
 ---
-name: recreate-dragonbreak
+name: recreate-petcompanion
 description: Recreate, run, package, or improve this repository's offline Windows dragon desktop pet, including articulated 3D motion, spoken break reminders, model preview/export, and measured resource use.
 ---
 
-# Recreate DragonBreak
+# Recreate Petcompanion
 
-Use the repository containing this skill as the working root. Its `DragonBreak.csproj` is the app; no parent repository is required. Read `README.md` for commands and `docs/HANDOFF.md` before replacing the model/renderer or optimizing resource use.
+Use the repository containing this skill as the working root. Its `Petcompanion.csproj` is the app; no parent repository is required. Read `README.md` for commands and `docs/HANDOFF.md` before replacing the model/renderer or optimizing resource use.
 
 ## Recreate the desktop pet
 
 1. On Windows x64, run `init.cmd`. It verifies the pinned .NET SDK, restores/builds, and runs self-checks. If the SDK is absent, report the required version from `global.json`; setup does not silently install machine-wide software.
-2. Run `dragonbreak.cmd preview` to inspect the live 3D geometry, or `dragonbreak.cmd run` for the actual desktop companion. The pet/tray opens settings; preview windows are separate processes.
-3. Run `dragonbreak.cmd test`. UI checks briefly cover the current monitor with muted reminders. Preserve the user's own running instances and read all result logs.
-4. For a requested installation, run `dragonbreak.cmd publish`, then `dragonbreak.cmd install` after the user has quit the installed pet. The installer creates per-user shortcuts and preserves the separate settings folder. Launch via the shortcut when a visible desktop pet is wanted.
+2. Run `petcompanion.cmd preview` to inspect the live 3D geometry, or `petcompanion.cmd run` for the actual desktop companion. The pet/tray opens settings; preview windows are separate processes.
+3. Run `petcompanion.cmd test`. UI checks briefly cover the current monitor with muted reminders. Preserve the user's own running instances and read all result logs.
+4. For a requested installation, run `petcompanion.cmd publish`, then `petcompanion.cmd install` after the user has quit the installed pet. The installer creates per-user shortcuts and preserves the separate settings folder. Launch via the shortcut when a visible desktop pet is wanted.
 
 ## Preserve the intended experience
 
